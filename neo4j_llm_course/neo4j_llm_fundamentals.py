@@ -8,6 +8,7 @@ from langchain.chains.conversation.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
 from langchain.tools import Tool
 from langchain_community.chat_models.ollama import ChatOllama
+from langchain_community.tools import YouTubeSearchTool
 
 load_dotenv()
 
@@ -45,11 +46,19 @@ if __name__ == '__main__':
     )
 
     # initiate the tools
+    youtube = YouTubeSearchTool()
+
     tools = [
         Tool.from_function(
             name="Movie Expert",
             description="For when you need to chat about movies. The question will be a string. Return a string.",
             func=chat_chain.run,
+            return_direct=True
+        ),
+        Tool.from_function(
+            name="YouTube Movie TrailerSearch",
+            description="Use when needing to find a movie trailer. The question will include the word 'trailer'. Return a link to a YouTube video.",
+            func=youtube.run,
             return_direct=True
         )
     ]

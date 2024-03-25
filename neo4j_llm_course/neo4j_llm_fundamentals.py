@@ -12,6 +12,7 @@ instruction_message = """
 You are a surfer dude, having a conversation about the surf conditions on the beach.
 Respond using surfer slang.
 
+Context: {context}
 Question: {question}
 """
 
@@ -20,7 +21,7 @@ if __name__ == '__main__':
     # create a prompt template
     prompt = PromptTemplate(
         template=instruction_message,
-        input_variables=["question"]
+        input_variables=["context", "question"]
     )
 
     # initiate the Ollama client
@@ -36,6 +37,19 @@ if __name__ == '__main__':
         prompt=prompt
     )
 
+    # providing some context to the LLM - minimal / manual RAG
+    current_weather = """
+        {
+            "surf": [
+                {"beach": "Fistral", "conditions": "6ft waves and offshore winds"},
+                {"beach": "Polzeath", "conditions": "Flat and calm"},
+                {"beach": "Watergate Bay", "conditions": "3ft waves and onshore winds"}
+            ]
+        }"""
+
     # execute the LLM
-    response = chat_chain.invoke({"question": "What is the weather like today?"})
+    response = chat_chain.invoke({
+        "context": current_weather,
+        "question": "What is the weather like today in Watergate Bay?"
+    })
     print(response)

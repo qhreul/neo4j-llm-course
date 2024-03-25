@@ -24,11 +24,5 @@ This implementation leverages [Ollama](https://python.langchain.com/docs/integra
 ### How to prepare the environment <a name="how-to-prepare-the-environment"></a>
 * Install dependencies
   ```
-  poetry install
-  ```
-  ---
-  **NOTE**
-  To update dependencies, it may be needed to run the following command prior to installing the packages:
-  ```
-  poetry lock
+  poetry update
   ```

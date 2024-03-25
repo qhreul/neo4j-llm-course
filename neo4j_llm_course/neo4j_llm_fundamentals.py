@@ -1,20 +1,21 @@
 import os
 from dotenv import load_dotenv
 
+from langchain import hub
+from langchain.agents import AgentExecutor, create_react_agent
 from langchain.chains import LLMChain
 from langchain.chains.conversation.memory import ConversationBufferMemory
 from langchain.prompts import PromptTemplate
+from langchain.tools import Tool
 from langchain_community.chat_models.ollama import ChatOllama
 
 load_dotenv()
 
 instruction_message = """
-You are a surfer dude, having a conversation about the surf conditions on the beach.
-Respond using surfer slang.
+You are a movie expert. You find movies from a genre or plot.
 
-Chat History: {chat_history}
-Context: {context}
-Question: {question}
+Chat History:{chat_history}
+Question:{input}
 """
 
 
@@ -22,11 +23,10 @@ if __name__ == '__main__':
     # create a prompt template
     prompt = PromptTemplate(
         template=instruction_message,
-        input_variables=["chat_history", "context", "question"]
+        input_variables=["chat_history", "input"]
     )
     memory = ConversationBufferMemory(
         memory_key="chat_history",
-        input_key="question",
         return_messages=True
     )
 
@@ -44,25 +44,28 @@ if __name__ == '__main__':
         memory=memory
     )
 
-    # providing some context to the LLM - minimal / manual RAG
-    current_weather = """
-        {
-            "surf": [
-                {"beach": "Fistral", "conditions": "6ft waves and offshore winds"},
-                {"beach": "Polzeath", "conditions": "Flat and calm"},
-                {"beach": "Watergate Bay", "conditions": "3ft waves and onshore winds"}
-            ]
-        }"""
+    # initiate the tools
+    tools = [
+        Tool.from_function(
+            name="Movie Expert",
+            description="For when you need to chat about movies. The question will be a string. Return a string.",
+            func=chat_chain.run,
+            return_direct=True
+        )
+    ]
 
-    # execute the LLM
-    response = chat_chain.invoke({
-        "context": current_weather,
-        "question": "What is the weather like today in Watergate Bay?"
-    })
-    print(response["text"])
+    # "ReAct" agent stands for "reasoning and acting"
+    agent_prompt = hub.pull("hwchase17/react-chat")
+    agent = create_react_agent(chat_llm, tools, agent_prompt)
+    agent_executor = AgentExecutor(
+        agent=agent,
+        tools=tools,
+        memory=memory,
+        max_iterations=3,
+        verbose=True,
+        handle_parsing_errors=True)
 
-    response = chat_chain.invoke({
-        "context": current_weather,
-        "question": "Where I am?"
-    })
-    print(response["text"])
+    while True:
+        question = input("> ")
+        response = agent_executor.invoke({"input": question})
+        print(response["output"])

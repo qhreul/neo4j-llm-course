@@ -23,6 +23,10 @@ if __name__ == '__main__':
     CYPHER_GENERATION_TEMPLATE = """
     You are an expert Neo4j Developer translating user questions into Cypher to answer questions about movies and provide recommendations.
     Convert the user's question based on the schema.
+    
+    Instructions:
+    Use only the provided relationship types and properties in the schema.
+    Do not use any other relationship types or properties that are not provided.
 
     Schema: {schema}
     Question: {question}

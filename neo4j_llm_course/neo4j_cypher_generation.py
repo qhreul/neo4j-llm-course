@@ -27,6 +27,7 @@ if __name__ == '__main__':
     Instructions:
     Use only the provided relationship types and properties in the schema.
     Do not use any other relationship types or properties that are not provided.
+    Do not include any explanations or apologies in your responses.
 
     Schema: {schema}
     Question: {question}
